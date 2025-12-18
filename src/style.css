@@ -1,0 +1,18 @@
+:root {
+  box-sizing: border-box;
+  font-size: 10px;
+  margin: 0px;
+  padding: 0px;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

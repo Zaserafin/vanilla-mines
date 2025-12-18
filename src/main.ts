@@ -43,7 +43,7 @@ let board: Array<Array<Cell>> = [];
 canvas.width = width * size;
 canvas.height = height * size;
 
-var myFont = new FontFace("tiny5", "url(/Tiny5-Regular.ttf)");
+var myFont = new FontFace("tiny5", "url(/vanilla-mines/Tiny5-Regular.ttf)");
 await myFont.load().then(function (font) {
   document.fonts.add(font);
 

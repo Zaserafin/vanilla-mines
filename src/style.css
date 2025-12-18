@@ -1,18 +1,71 @@
-:root {
+@import url("https://fonts.googleapis.com/css2?family=Tiny5&display=swap");
+
+html {
   box-sizing: border-box;
-  font-size: 10px;
   margin: 0px;
   padding: 0px;
+
+  font-family: "Tiny5", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 * {
   box-sizing: inherit;
 }
 
-#app {
-  width: 100vw;
-  height: 100vh;
+html,
+body {
+  width: 100svw;
+  height: 100svh;
+  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background-color: #8bd16a;
+}
+
+.board-container {
+  background-color: #b6b6b6;
+  padding: 10px;
+
+  border: 8px solid transparent;
+  border-top-color: #dadada;
+  border-left-color: #dadada;
+  border-bottom-color: #63615b;
+  border-right-color: #63615b;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 12px;
+
+  border: 8px solid transparent;
+  border-top-color: #63615b;
+  border-left-color: #63615b;
+  border-bottom-color: #dadada;
+  border-right-color: #dadada;
+
+  .counter {
+    background-color: black;
+    height: 100%;
+    width: fit-content;
+    color: red;
+    padding: 4px 20px;
+    text-align: center !important;
+    font-size: 3rem;
+  }
+}
+
+#canvas-element {
+  border: 8px solid transparent;
+  border-top-color: #63615b;
+  border-left-color: #63615b;
+  border-bottom-color: #dadada;
+  border-right-color: #dadada;
 }

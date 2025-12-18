@@ -7,18 +7,55 @@ interface Cell {
   status: CellStatus;
 }
 
+const colors = [
+  "#c0c0c0",
+  "#0406F5",
+  "#0D7A09",
+  "#E90A03",
+  "#080272",
+  "#81020D",
+  "#008080",
+  "red",
+  "red",
+];
+
 const canvas = document.getElementById("canvas-element") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+const timeCounterElement = document.getElementById("time-counter");
+const flagsCounterElement = document.getElementById("flags-counter");
+const resetButtonElement = document.getElementById("reset-button");
+
+let secondsTimer: number | null = null;
 
 const minesAmount = 10;
 const size = 50;
 const width = 10;
 const height = 10;
 
+const data = {
+  flagsUsed: 0,
+  seconds: 0,
+};
+
 let board: Array<Array<Cell>> = [];
 
 canvas.width = width * size;
 canvas.height = height * size;
+
+var myFont = new FontFace("tiny5", "url(/Tiny5-Regular.ttf)");
+await myFont.load().then(function (font) {
+  document.fonts.add(font);
+
+  console.log("Font loaded");
+  context.font = "50px myFont";
+});
+
+function incrementSeconds() {
+  if (!timeCounterElement) return;
+  data.seconds++;
+  timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
+}
 
 function findFreeCell() {
   let cell;
@@ -79,19 +116,19 @@ function validCoordinates(y: number, x: number) {
 function fill(y: number, x: number) {
   if (!validCoordinates(y, x)) return;
 
-  if (
-    board[y][x].status === "visible" ||
-    board[y][x].status === "flagged" ||
-    board[y][x].value !== 0
-  )
-    return;
+  const cell = board[y][x];
 
-  board[y][x].status = "visible";
+  if (cell.status === "visible" || cell.status === "flagged") return;
 
-  fill(y, x + 1);
-  fill(y, x - 1);
-  fill(y - 1, x);
-  fill(y + 1, x);
+  cell.status = "visible";
+  if (cell.value !== 0) return;
+
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dy === 0 && dx === 0) continue;
+      fill(y + dy, x + dx);
+    }
+  }
 }
 
 function renderBoard() {
@@ -101,9 +138,9 @@ function renderBoard() {
     for (let colIdx = 0; colIdx < row.length; colIdx++) {
       const col = row[colIdx];
 
-      if (col.status === "hidden") context.fillStyle = "darkgray";
+      if (col.status === "hidden") context.fillStyle = "#a1a1a1ff";
       if (col.status === "flagged") context.fillStyle = "pink";
-      if (col.status === "visible") context.fillStyle = "violet";
+      if (col.status === "visible") context.fillStyle = "#c0c0c0";
 
       if (col.value === -1 && col.status === "visible") {
         context.fillStyle = "red";
@@ -117,12 +154,12 @@ function renderBoard() {
       );
 
       if (col.value !== 0 && col.status === "visible") {
-        context.fillStyle = "black";
-        context.font = "20px serif";
+        context.fillStyle = colors[col.value];
+        context.font = "30px Tiny5";
         context.fillText(
           col.value.toString(),
           rowIdx * size + size / 2 - 5,
-          colIdx * size + size / 2 + 7
+          colIdx * size + size / 2 + 10
         );
       }
     }
@@ -131,12 +168,12 @@ function renderBoard() {
 
 function renderLines() {
   for (let x = 1; x < width; x++) {
-    context.fillStyle = "black";
+    context.fillStyle = "#63615b";
     context.fillRect(x * size, 0, 2, height * size);
   }
 
   for (let y = 1; y < width; y++) {
-    context.fillStyle = "black";
+    context.fillStyle = "#63615b";
     context.fillRect(0, y * size, width * size, 2);
   }
 }
@@ -150,22 +187,47 @@ function toggleAllBoard() {
   }
 }
 
-generateBoard();
+function updateFlags() {
+  if (!flagsCounterElement) return;
+  const minesRemaining = minesAmount - data.flagsUsed;
+  flagsCounterElement?.setHTMLUnsafe(
+    minesRemaining.toString().padStart(3, "0")
+  );
+}
+
+function start() {
+  generateBoard();
+  data.seconds = 0;
+  data.flagsUsed = 0;
+  updateFlags();
+  if (timeCounterElement)
+    timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
+  if (secondsTimer) clearInterval(secondsTimer);
+  secondsTimer = setInterval(incrementSeconds, 1000);
+}
 
 if (context) {
-  context.fillStyle = "gray";
+  context.fillStyle = "#a1a1a1ff";
   context.fillRect(0, 0, width * size, height * size);
 
   renderBoard();
   renderLines();
 }
 
-canvas.addEventListener("mousedown", (evt: MouseEvent) => {
+resetButtonElement?.addEventListener("click", (evt: PointerEvent) => {
   evt.preventDefault();
   evt.stopPropagation();
   evt.stopImmediatePropagation();
 
-  console.log(evt);
+  start();
+});
+
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+canvas.addEventListener("mousedown", (evt: MouseEvent) => {
+  evt.preventDefault();
+  evt.stopPropagation();
+  evt.stopImmediatePropagation();
 
   const primary = evt.button === 0;
 
@@ -174,17 +236,18 @@ canvas.addEventListener("mousedown", (evt: MouseEvent) => {
 
   const cellClicked = board[y][x];
 
-  console.log(
-    "Clicking on: X=",
-    x,
-    " Y=",
-    y,
-    " Celda=",
-    JSON.stringify(cellClicked)
-  );
+  if (cellClicked.status === "visible") return;
 
-  if (!primary && cellClicked.status !== "hidden") {
-    board[y][x].status = "flagged";
+  if (!primary) {
+    if (cellClicked.status === "flagged") {
+      board[y][x].status = "hidden";
+      data.flagsUsed = Math.max(0, data.flagsUsed - 1);
+    } else {
+      board[y][x].status = "flagged";
+      data.flagsUsed = Math.max(0, data.flagsUsed + 1);
+    }
+
+    updateFlags();
     renderBoard();
     renderLines();
     return;
@@ -215,3 +278,5 @@ canvas.addEventListener("mousedown", (evt: MouseEvent) => {
     renderLines();
   }
 });
+
+start();

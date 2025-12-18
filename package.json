@@ -1,14 +1,19 @@
 {
   "name": "vanilla-mines",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "homepage": "https://zaserafin.github.io/vanilla-mines/",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "typescript": "~5.9.3",
     "vite": "^7.2.4"
   }

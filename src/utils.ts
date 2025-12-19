@@ -9,3 +9,4 @@ export function drawRect(
   ctx.fillStyle = color;
   ctx.fillRect(x, y, width, height);
 }
+

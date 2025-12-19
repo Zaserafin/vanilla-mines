@@ -196,6 +196,7 @@ function updateFlags() {
 }
 
 function start() {
+  board = [];
   generateBoard();
   data.seconds = 0;
   data.flagsUsed = 0;
@@ -204,6 +205,9 @@ function start() {
     timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
   if (secondsTimer) clearInterval(secondsTimer);
   secondsTimer = setInterval(incrementSeconds, 1000);
+
+  renderBoard();
+  renderLines();
 }
 
 if (context) {
@@ -219,6 +223,7 @@ resetButtonElement?.addEventListener("click", (evt: PointerEvent) => {
   evt.stopPropagation();
   evt.stopImmediatePropagation();
 
+  console.log("reseteando");
   start();
 });
 
@@ -255,6 +260,7 @@ canvas.addEventListener("mousedown", (evt: MouseEvent) => {
 
   if (primary && cellClicked.value === -1) {
     console.log("Game Over ☠️");
+    if (secondsTimer) clearInterval(secondsTimer);
     toggleAllBoard();
 
     renderBoard();

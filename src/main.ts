@@ -28,17 +28,23 @@ const resetButtonElement = document.getElementById("reset-button");
 
 let secondsTimer: number | null = null;
 
-const minesAmount = 10;
+const minesAmount = 9;
 const size = 50;
-const width = 10;
-const height = 10;
+const width = 9;
+const height = 9;
 
 const data = {
   flagsUsed: 0,
   seconds: 0,
 };
 
-let board: Array<Array<Cell>> = [];
+let started: boolean = false;
+let board: Array<Array<Cell>> = Array.from({ length: height }, () =>
+  Array.from({ length: width }, () => ({
+    value: 0,
+    status: "hidden",
+  }))
+);
 
 canvas.width = width * size;
 canvas.height = height * size;
@@ -57,13 +63,13 @@ function incrementSeconds() {
   timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
 }
 
-function findFreeCell() {
+function findFreeCell(exclude?: { x: number; y: number }) {
   let cell;
 
   while (true) {
     let x = Math.floor(Math.random() * width);
     let y = Math.floor(Math.random() * height);
-    if (board[y][x].value !== -1) {
+    if (board[y][x].value !== -1 && x !== exclude?.x && y !== exclude?.y) {
       cell = { y, x };
       break;
     }
@@ -72,7 +78,7 @@ function findFreeCell() {
   return cell;
 }
 
-function generateBoard() {
+function generateBoard(intialPost: { x: number; y: number }) {
   for (let y = 0; y < height; y++) {
     let row: Array<Cell> = [];
     for (let x = 0; x < width; x++) {
@@ -85,7 +91,7 @@ function generateBoard() {
   }
 
   for (let mines = 0; mines < minesAmount; mines++) {
-    const { x, y } = findFreeCell();
+    const { x, y } = findFreeCell(intialPost);
     board[y][x].value = -1;
 
     for (let dy = -1; dy <= 1; dy++) {
@@ -195,9 +201,18 @@ function updateFlags() {
   );
 }
 
-function start() {
-  board = [];
-  generateBoard();
+function start(intialPost: { x: number; y: number }) {
+  // board = [];
+  started = true;
+
+  board = Array.from({ length: height }, () =>
+    Array.from({ length: width }, () => ({
+      value: 0,
+      status: "hidden",
+    }))
+  );
+  console.log("Ignoring: ", intialPost);
+  generateBoard(intialPost);
   data.seconds = 0;
   data.flagsUsed = 0;
   updateFlags();
@@ -205,6 +220,26 @@ function start() {
     timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
   if (secondsTimer) clearInterval(secondsTimer);
   secondsTimer = setInterval(incrementSeconds, 1000);
+
+  renderBoard();
+  renderLines();
+}
+
+function reset() {
+  started = false;
+  data.seconds = 0;
+  data.flagsUsed = 0;
+  updateFlags();
+  if (timeCounterElement)
+    timeCounterElement.setHTMLUnsafe(data.seconds.toString().padStart(3, "0"));
+  if (secondsTimer) clearInterval(secondsTimer);
+
+  board = Array.from({ length: height }, () =>
+    Array.from({ length: width }, () => ({
+      value: 0,
+      status: "hidden",
+    }))
+  );
 
   renderBoard();
   renderLines();
@@ -224,7 +259,7 @@ resetButtonElement?.addEventListener("click", (evt: PointerEvent) => {
   evt.stopImmediatePropagation();
 
   console.log("reseteando");
-  start();
+  reset();
 });
 
 document.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -238,6 +273,10 @@ canvas.addEventListener("mousedown", (evt: MouseEvent) => {
 
   const x = Math.floor(evt.offsetY / size);
   const y = Math.floor(evt.offsetX / size);
+
+  if (!started) {
+    start({ x, y });
+  }
 
   const cellClicked = board[y][x];
 
@@ -285,4 +324,6 @@ canvas.addEventListener("mousedown", (evt: MouseEvent) => {
   }
 });
 
-start();
+// start();
+
+reset();

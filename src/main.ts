@@ -124,7 +124,12 @@ function fill(y: number, x: number) {
 
   const cell = board[y][x];
 
-  if (cell.status === "visible" || cell.status === "flagged") return;
+  if (
+    cell.status === "visible" ||
+    cell.status === "flagged" ||
+    cell.value === -1
+  )
+    return;
 
   cell.status = "visible";
   if (cell.value !== 0) return;

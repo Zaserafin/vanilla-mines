@@ -24,7 +24,7 @@ body {
   align-items: center;
   justify-content: center;
 
-  background-color: #8bd16a;
+  /* background-color: #8bd16a; */
 }
 
 .board-container {
@@ -86,4 +86,33 @@ body {
   border-left-color: #63615b;
   border-bottom-color: #dadada;
   border-right-color: #dadada;
+}
+
+
+.animated-bg {
+	animation-name: color_change;
+	animation-duration: 15s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+}
+
+@-webkit-keyframes color_change {
+	from { background-color: blue; }
+	to { background-color: red; }
+}
+@-moz-keyframes color_change {
+	from { background-color: blue; }
+	to { background-color: red; }
+}
+@-ms-keyframes color_change {
+	from { background-color: blue; }
+	to { background-color: red; }
+}
+@-o-keyframes color_change {
+	from { background-color: blue; }
+	to { background-color: red; }
+}
+@keyframes color_change {
+	from { background-color: blue; }
+	to { background-color: red; }
 }
